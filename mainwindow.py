@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_Agregar_Inicio.clicked.connect(self.click_agregar_inicio)
         self.ui.pushButton_Agregar_Final.clicked.connect(self.click_agregar_final)
         self.ui.pushButton_Mostrar.clicked.connect(self.click_mostrar)
+        self.ui.pushButton_Mostrar_Grafo.clicked.connect(self.click_mostrar_grafo)
 
         self.ui.pushButton_Ordenar_id.clicked.connect(self.click_ordenar_id)
         self.ui.pushButton_Ordenar_velocidad.clicked.connect(self.click_ordenar_velocidad)
@@ -115,7 +116,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(
                 self,
                 "Error",
-                "Por favor, completa todos los campos antes de insertar una partícula"
+                "Por favor, completa todos los campos antes de insertar una particula"
             )
             return False
         return True
@@ -136,7 +137,7 @@ class MainWindow(QMainWindow):
     def particula_existente(self, id):
         for particula in self.particulas:
             if particula.id == id:
-                QMessageBox.warning(self, "Error", "Ya existe una partícula con ese ID. Ingresa otro ID único.")
+                QMessageBox.warning(self, "Error", "Ya existe una particula con ese ID. Ingresa otro ID único.")
                 return True
         return False
 
@@ -153,6 +154,25 @@ class MainWindow(QMainWindow):
             "Error", "Inserta al menos una particula antes de mostrar"
             )
 
+    @Slot()
+    def click_mostrar_grafo(self):
+        self.ui.salida.clear() #salida es el name del text edit
+
+
+        if self.particulas:
+            self.ui.salida.insertPlainText(f"\tGRAFO\n")
+            print("\n\t\tGRAFO\n")
+
+            for particula in self.particulas:
+                grafo = particula.grafo()
+                self.ui.salida.insertPlainText(f"{grafo}\n")
+                pprint(grafo)
+        else:
+            QMessageBox.warning(
+            self,
+            "Error", "Inserta al menos una particula antes de mostrar"
+            )
+    
 
     @Slot()
     def action_Abrir_Archivo(self):
@@ -340,7 +360,7 @@ class MainWindow(QMainWindow):
         pen = QPen()
         pen.setWidth(4) #Ancho de la linea
 
-        escala = 3
+        escala = 2
 
          # Ordena las particulas por el atributo distancia
         #particulas_ordenadas = sorted(self.particulas, key=lambda particula: particula.distancia)
@@ -505,11 +525,11 @@ class MainWindow(QMainWindow):
 
             if self.cargados_desde_json:  # mita si los puntos se cargaron desde  un .json
                 
-                label1 = QGraphicsTextItem(f"Punto {i} ({x1}),({y1})") # coordenadas de los puntos
+                label1 = QGraphicsTextItem(f"{i} ({x1}),({y1})") # coordenadas de los puntos
                 # label2 = QGraphicsTextItem(f"Punto {i + 1}")
 
                 if label1 not in labels_added: # para que no se creen labels repetidos con el mismo id
-                    label1.setPos(x1 + 10, y1 - 10)
+                    label1.setPos(x1 + 5, y1 - 10)
                     font = QFont()
                     font.setPixelSize(5)  # tamano del label 7
                     label1.setFont(font) 

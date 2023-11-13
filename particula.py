@@ -65,9 +65,14 @@ class Particula:
 
     
     def grafo(self):
-        return {
-            "(" + str(self.__origen_x) + ", " + str(self.__origen_y) + "): [(" + str(self.__destino_x) + ", " + str(self.__destino_y) + "), " +  str(int(self.__distancia)) + "]"
-        }
+      origen = f"({self.__origen_x}, {self.__origen_y})"
+      destino = f"({self.__destino_x}, {self.__destino_y})"
+      distancia = f"[{int(self.__distancia)}]"
+
+      return f"{origen} ---{distancia}---> {destino}"
+
+    
+
 
     @property
     def id(self):
