@@ -69,8 +69,6 @@ class Particula:
             "(" + str(self.__origen_x) + ", " + str(self.__origen_y) + "): [(" + str(self.__destino_x) + ", " + str(self.__destino_y) + "), " +  str(int(self.__distancia)) + "]"
         }
 
-
-
     @property
     def id(self):
         return self.__id
