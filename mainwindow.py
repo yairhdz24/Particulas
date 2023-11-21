@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QTableWidgetItem, QGraphicsScene, QLabel, QGraphicsView, QGraphicsTextItem
+from PySide2.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QTableWidgetItem, QGraphicsScene, QLabel, QGraphicsView, QGraphicsTextItem, QGraphicsLineItem
 from PySide2.QtCore import Slot
 from PySide2 import QtCore
 from PySide2.QtGui import QFont, QPen, QColor, QTransform, QWheelEvent, QPainter, QBrush
@@ -9,12 +9,13 @@ from ui_mainwindow import Ui_MainWindow
 from particula import Particula
 from particulas import Particulas
 from algoritmos import *
-from grafo import Grafo
+from grafo import *
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.grafo = Grafo()
 
         self.cargados_desde_json = False
 
@@ -53,6 +54,13 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_dibujar_random.clicked.connect(self.dibujar_puntos_Random)
         self.ui.pushButton_Fuerza_bruta.clicked.connect(self.Fuerza_bruta)
         self.ui.pushButton_Dijkstra.clicked.connect(self.Dijkstra)
+        self.ui.pushButton_Kruskal.clicked.connect(self.Kruskal)
+        self.ui.pushButton_Prim.clicked.connect(self.Prim)
+        self.ui.pushButton_Graham.clicked.connect(self.Graham)
+
+
+
+
 
         self.ui.spinBox_puntos.valueChanged.connect(self.spinBox_puntos)
         self.ui.horizontalSlider_2.valueChanged.connect(self.slider_puntos)
@@ -511,9 +519,9 @@ class MainWindow(QMainWindow):
             brush = QBrush(QColor(color))
 
 
-            self.sceneAlgoritmos.addEllipse(origenX, origenY, 3, 3, pen, brush)
+            self.sceneAlgoritmos.addEllipse(origenX, origenY, 2, 2, pen, brush)
             #punto de destino
-            self.sceneAlgoritmos.addEllipse(destinoX, destinoY, 3, 3, pen, brush)
+            self.sceneAlgoritmos.addEllipse(destinoX, destinoY, 2, 2, pen, brush)
 
    
     
@@ -592,11 +600,14 @@ class MainWindow(QMainWindow):
         while padres[camino[-1]] is not None:
             camino.append(padres[camino[-1]])
         camino.reverse()
+        
+        print(f"camino mas corto {camino}")
 
         # Dibujar el camino más corto en la escena
         pen_camino = QPen()
         pen_camino.setWidth(2)
         pen_camino.setColor(QColor(0, 255, 0))  # Color del camino (puedes ajustar esto)
+        
 
         for i in range(len(camino) - 1):
             punto_actual = camino[i]
@@ -605,7 +616,7 @@ class MainWindow(QMainWindow):
             x_actual, y_actual = punto_actual
             x_siguiente, y_siguiente = punto_siguiente
 
-            self.sceneAlgoritmos.addLine(x_actual, y_actual, x_siguiente, y_siguiente, pen_camino)
+            self.sceneAlgoritmos.addLine(x_actual + 2, y_actual + 2, x_siguiente + 2, y_siguiente + 2, pen_camino)
 
         # Dibujar el grafo original y el destino
         pen_original = QPen()
@@ -619,6 +630,110 @@ class MainWindow(QMainWindow):
             x_destino = particula.destino_x
             y_destino = particula.destino_y
 
-            self.sceneAlgoritmos.addEllipse(x_origen, y_origen, 6, 6,  pen_original, brush)
-            self.sceneAlgoritmos.addEllipse(x_destino, y_destino, 6, 6,  pen_original, brush)
-            self.sceneAlgoritmos.addLine(x_origen + 4, y_origen + 4, x_destino + 4, y_destino + 4, pen_original)
+            # self.sceneAlgoritmos.addEllipse(x_origen, y_origen, 2, 2,  pen_original, brush)
+            # self.sceneAlgoritmos.addEllipse(x_destino, y_destino, 2, 2,  pen_original, brush)
+            # self.sceneAlgoritmos.addLine(x_origen + 4, y_origen + 4, x_destino + 4, y_destino + 4, pen_original)
+
+             # Agregar etiquetas para el punto de inicio y fin
+        # self.sceneAlgoritmos.addText(f'Inicio: ({origen[0]}, {origen[1]})', QFont('Arial', 8)).setPos(origen[0] + 15, origen[1] - 15)
+        # self.sceneAlgoritmos.addText(f'Fin: ({destino[0]}, {destino[1]})', QFont('Arial', 8)).setPos(destino[0] + 10, destino[1] - 10)
+
+
+    @Slot()  # Algoritmo de Kruskal
+    def Kruskal(self):
+        if not self.particulas:
+            self.msg_error()
+            return
+
+        # Crear e inicializar el grafo para Kruskal
+        grafo_kruskal = GrafoKruskal()
+        for particula in self.particulas:
+            origen = (particula.origen_x, particula.origen_y)
+            destino = (particula.destino_x, particula.destino_y)
+            peso = particula.velocidad
+            grafo_kruskal.agregar_arista(origen, destino, peso)
+
+        # Obtener el árbol mínimo de Kruskal
+        arbol_minimo = grafo_kruskal.kruskal()
+
+        # Imprimir el árbol mInimo en la consola
+        print("Arbol mInimo de Kruskal:", arbol_minimo)
+
+        # Dibujar el árbol mínimo en la escena
+        pen_arbol_minimo = QPen()
+        pen_arbol_minimo.setWidth(2)
+        pen_arbol_minimo.setColor(QColor(255, 0, 0))  # Color del árbol mínimo (puedes ajustar esto)
+
+        for arista in arbol_minimo:
+            origen, destino, peso = arista
+            x_origen, y_origen = origen
+            x_destino, y_destino = destino
+
+            # Dibujar arista en la escena
+            self.sceneAlgoritmos.addLine(x_origen, y_origen, x_destino, y_destino, pen_arbol_minimo)
+   
+
+    @Slot()  # Algoritmo de Prim
+    def Prim(self):
+        if not self.particulas:
+            self.msg_error()
+            return
+
+        grafo = self.crear_grafo()
+
+        self.dibujar()
+
+        # Ejecutar algoritmo de Prim
+        arbol_minimo = grafo.prim()
+
+        print("Arbol mInimo de Prim:", arbol_minimo)
+        
+        # Dibujar el árbol mínimo en la escena
+
+        
+        pen_arbol_minimo = QPen()
+        pen_arbol_minimo.setWidth(2)
+        pen_arbol_minimo.setColor(QColor(255, 0, 0))  # Color del árbol mínimo (puedes ajustar esto)
+
+        for arista in arbol_minimo:
+            vertice, vecino, peso = arista
+            x_vertice, y_vertice = vertice
+            x_vecino, y_vecino = vecino
+
+            # Dibujar arista en la escena
+            self.sceneAlgoritmos.addLine(x_vertice, y_vertice, x_vecino, y_vecino, pen_arbol_minimo)
+
+            
+    @Slot()
+    def Graham(self):
+        if not self.particulas:
+            self.msg_error()
+            return
+
+        grafo = self.crear_grafo()
+
+        # Dibujar el grafo original en la escena
+        self.dibujar()
+
+        # Ejecutar algoritmo de Graham
+        convex_hull = grafo.graham_scan()
+
+        print("Cierre convexo de Graham:", convex_hull)
+
+        # Dibujar el cierre convexo en la escena
+        pen_convex_hull = QPen()
+        pen_convex_hull.setWidth(2)
+        pen_convex_hull.setColor(QColor(0, 0, 255))  # Color del cierre convexo (ajusta según sea necesario)
+
+        for i in range(len(convex_hull) - 1):
+            vertice = convex_hull[i]
+            vecino = convex_hull[i + 1]
+            x_vertice, y_vertice = vertice
+            x_vecino, y_vecino = vecino
+
+            # Dibujar arista en la escena
+            self.sceneAlgoritmos.addLine(x_vertice, y_vertice + 2 , x_vecino + 2, y_vecino + 2, pen_convex_hull)
+
+        # Conectar el último punto con el primero para cerrar el cierre convexo
+        x_primer_punto, y_primer_punto = convex_hull[0]
+        self.sceneAlgoritmos.addLine(x_vecino, y_vecino + 2, x_primer_punto + 2, y_primer_punto + 2, pen_convex_hull)
