@@ -2,13 +2,14 @@ from PySide2.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QTableWidge
 from PySide2.QtCore import Slot
 from PySide2 import QtCore
 from PySide2.QtGui import QFont, QPen, QColor, QTransform, QWheelEvent, QPainter, QBrush
-from random import randint
+from random import randint, random
 from pprint import pprint
 
 from ui_mainwindow import Ui_MainWindow
 from particula import Particula
 from particulas import Particulas
 from algoritmos import *
+from grafo import Grafo
 
 
 class MainWindow(QMainWindow):
@@ -51,6 +52,7 @@ class MainWindow(QMainWindow):
         self.ui.Mostrar_puntos_pushButton.clicked.connect(self.dibujar_puntos)
         self.ui.pushButton_dibujar_random.clicked.connect(self.dibujar_puntos_Random)
         self.ui.pushButton_Fuerza_bruta.clicked.connect(self.Fuerza_bruta)
+        self.ui.pushButton_Dijkstra.clicked.connect(self.Dijkstra)
 
         self.ui.spinBox_puntos.valueChanged.connect(self.spinBox_puntos)
         self.ui.horizontalSlider_2.valueChanged.connect(self.slider_puntos)
@@ -156,23 +158,36 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def click_mostrar_grafo(self):
-        self.ui.salida.clear() #salida es el name del text edit
-
+        self.ui.salida.clear()
 
         if self.particulas:
-            self.ui.salida.insertPlainText(f"\tGRAFO\n")
-            print("\n\t\tGRAFO\n")
+            self.ui.salida.insertPlainText("\tGRAFO\n")
 
-            for particula in self.particulas:
-                grafo = particula.grafo()
-                self.ui.salida.insertPlainText(f"{grafo}\n")
-                pprint(grafo)
+            grafo = self.crear_grafo()
+            print("\tGRAFO\n")
+            pprint(grafo.grafo)
+
+            for vertice, aristas in grafo.grafo.items():
+                self.ui.salida.insertPlainText(f"Vertice: {vertice}\n")
+
+                for arista in aristas:
+                    destino, distancia = arista
+                    self.ui.salida.insertPlainText(f"  -> {destino} (Distancia: {distancia})\n")
+
+                self.ui.salida.insertPlainText("\n")
+
         else:
             QMessageBox.warning(
-            self,
-            "Error", "Inserta al menos una particula antes de mostrar"
+                self,
+                "Error", "Inserta al menos una particula antes de mostrar"
             )
-    
+
+    @Slot()
+    def imprimir_grafo(self, grafo):
+        for origen, aristas in grafo.grafo.items():
+            self.ui.salida.insertPlainText(f"Vértice: {origen}\n")
+            for destino, distancia in aristas:
+                self.ui.salida.insertPlainText(f"  -> {destino} (Distancia: {distancia})\n")
 
     @Slot()
     def action_Abrir_Archivo(self):
@@ -537,24 +552,73 @@ class MainWindow(QMainWindow):
                     labels_added.add(label1)
                     self.dibujar_puntos() # para que los puntos queden sobre lka linea
 
-    @Slot()
+   
+    @Slot()  # Crea el grafo son las prticulas cargadas y se manda a llmar en mostrar grafo
     def crear_grafo(self):
-        grafo = {}  # Diccionario que representa el grafo
+        grafo = Grafo()
+    
+        for particula in self.particulas:
+            origen = {'x': particula.origen_x, 'y': particula.origen_y}
+            destino = {'x': particula.destino_x, 'y': particula.destino_y}
+            distancia = particula.distancia
+    
+            grafo.agregar_arista({
+                'origen': origen,
+                'destino': destino,
+                'distancia': distancia
+            })
+    
+        return grafo
+
+    @Slot()  # Algoritmo dijkstra
+    def Dijkstra(self):
+        if not self.particulas:
+            self.msg_error()
+            return
+
+        grafo = self.crear_grafo()
+        vertices = grafo.obtener_vertices()
+
+        # Dibujar el grafo original en la escena
+        self.dibujar()
+
+        origen = vertices[0]  # Puedes elegir cualquier vértice como origen, aquí tomo el primero.
+        destino = vertices[-1]  # Elegir un vértice aleatorio como destino
+
+        distancias, padres = grafo.dijkstra(origen)
+
+        # Reconstruir el camino desde el destino hasta el origen
+        camino = [destino]
+        while padres[camino[-1]] is not None:
+            camino.append(padres[camino[-1]])
+        camino.reverse()
+
+        # Dibujar el camino más corto en la escena
+        pen_camino = QPen()
+        pen_camino.setWidth(2)
+        pen_camino.setColor(QColor(0, 255, 0))  # Color del camino (puedes ajustar esto)
+
+        for i in range(len(camino) - 1):
+            punto_actual = camino[i]
+            punto_siguiente = camino[i + 1]
+
+            x_actual, y_actual = punto_actual
+            x_siguiente, y_siguiente = punto_siguiente
+
+            self.sceneAlgoritmos.addLine(x_actual, y_actual, x_siguiente, y_siguiente, pen_camino)
+
+        # Dibujar el grafo original y el destino
+        pen_original = QPen()
+        pen_original.setColor(QColor(0, 0, 0))
+        pen_original.setWidth(3)
+        brush = QBrush(QColor(0, 0, 0))
 
         for particula in self.particulas:
-            origen = (particula.origen_x, particula.origen_y)
-            destino = (particula.destino_x, particula.destino_y)
-            distancia = distancia_euclidiana(origen[0], origen[1], destino[0], destino[1])
+            x_origen = particula.origen_x
+            y_origen = particula.origen_y
+            x_destino = particula.destino_x
+            y_destino = particula.destino_y
 
-            # Agregar arista desde origen a destino
-            if origen not in grafo:
-                grafo[origen] = []
-            grafo[origen].append((destino, distancia))
-
-            # Agregar arista desde destino a origen
-            if destino not in grafo:
-                grafo[destino] = []
-            grafo[destino].append((origen, distancia))
-
-            print(grafo)
-        return grafo
+            self.sceneAlgoritmos.addEllipse(x_origen, y_origen, 6, 6,  pen_original, brush)
+            self.sceneAlgoritmos.addEllipse(x_destino, y_destino, 6, 6,  pen_original, brush)
+            self.sceneAlgoritmos.addLine(x_origen + 4, y_origen + 4, x_destino + 4, y_destino + 4, pen_original)
