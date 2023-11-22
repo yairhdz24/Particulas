@@ -85,7 +85,6 @@ class Grafo:
                         heapq.heappush(heap, (peso_vecino, vecino, vecino_vecino))
 
         return aristas
-    
 
     #Algoritmo Graham
     
