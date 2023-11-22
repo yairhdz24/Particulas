@@ -1,0 +1,72 @@
+[
+    {
+        "id": "1",
+        "origen": { "x": 100, "y": 100 },
+        "destino": { "x": 200, "y": 100 },
+        "color": { "red": 255, "green": 0, "blue": 0 },
+        "velocidad": 60
+    },
+    {
+        "id": "2",
+        "origen": { "x": 200, "y": 100 },
+        "destino": { "x": 200, "y": 200 },
+        "color": { "red": 0, "green": 255, "blue": 0 },
+        "velocidad": 70
+    },
+    {
+        "id": "3",
+        "origen": { "x": 200, "y": 200 },
+        "destino": { "x": 100, "y": 200 },
+        "color": { "red": 0, "green": 0, "blue": 255 },
+        "velocidad": 80
+    },
+    {
+        "id": "4",
+        "origen": { "x": 100, "y": 200 },
+        "destino": { "x": 100, "y": 100 },
+        "color": { "red": 255, "green": 255, "blue": 0 },
+        "velocidad": 90
+    },
+    {
+        "id": "5",
+        "origen": { "x": 150, "y": 50 },
+        "destino": { "x": 250, "y": 50 },
+        "color": { "red": 255, "green": 0, "blue": 255 },
+        "velocidad": 75
+    },
+    {
+        "id": "6",
+        "origen": { "x": 250, "y": 50 },
+        "destino": { "x": 250, "y": 150 },
+        "color": { "red": 0, "green": 255, "blue": 255 },
+        "velocidad": 85
+    },
+    {
+        "id": "7",
+        "origen": { "x": 250, "y": 150 },
+        "destino": { "x": 150, "y": 150 },
+        "color": { "red": 255, "green": 255, "blue": 0 },
+        "velocidad": 95
+    },
+    {
+        "id": "8",
+        "origen": { "x": 150, "y": 150 },
+        "destino": { "x": 150, "y": 50 },
+        "color": { "red": 0, "green": 0, "blue": 0 },
+        "velocidad": 100
+    },
+    {
+        "id": "9",
+        "origen": { "x": 50, "y": 100 },
+        "destino": { "x": 50, "y": 200 },
+        "color": { "red": 128, "green": 128, "blue": 128 },
+        "velocidad": 70
+    },
+    {
+        "id": "10",
+        "origen": { "x": 50, "y": 200 },
+        "destino": { "x": 50, "y": 100 },
+        "color": { "red": 128, "green": 128, "blue": 128 },
+        "velocidad": 70
+    }
+]
