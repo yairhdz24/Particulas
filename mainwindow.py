@@ -592,8 +592,8 @@ class MainWindow(QMainWindow):
         self.dibujar()
 
         origen = vertices[0]  # Puedes elegir cualquier vertice como origen, aqui tome el primero.
-        # destino = random.choice(vertices)  # Elegir un vertice aleatorio como destino
-        destino = vertices[1]  # Elegir un vertice aleatorio como destino
+        destino = random.choice(vertices)  # Elegir un vertice aleatorio como destino
+        #destino = vertices[1]  # Elegir un vertice aleatorio como destino
 
         distancias, padres = grafo.dijkstra(origen)
 
@@ -643,35 +643,37 @@ class MainWindow(QMainWindow):
         if not self.particulas:
             self.msg_error()
             return
-
+    
         # Crear e inicializar el grafo para Kruskal
         grafo_kruskal = GrafoKruskal()
         for particula in self.particulas:
             origen = (particula.origen_x, particula.origen_y)
             destino = (particula.destino_x, particula.destino_y)
-            peso = particula.velocidad
-            grafo_kruskal.agregar_arista(origen, destino, peso)
-
+            grafo_kruskal.agregar_arista(origen, destino)
+    
+        # Ordenar las aristas por la comparación natural de las tuplas
+        grafo_kruskal.aristas.sort()
+    
         # Obtener el árbol mínimo de Kruskal
         arbol_minimo = grafo_kruskal.kruskal()
-
-        # Imprimir el árbol mInimo en la consola
+    
+        # Imprimir el árbol mínimo en la consola
         print("Arbol mInimo de Kruskal:", arbol_minimo)
-
+    
         # Dibujar el árbol mínimo en la escena
         pen_arbol_minimo = QPen()
         pen_arbol_minimo.setWidth(2)
         pen_arbol_minimo.setColor(QColor(255, 0, 0))  # Color del árbol mínimo (puedes ajustar esto)
-
+    
         for arista in arbol_minimo:
-            origen, destino, peso = arista
+            origen, destino = arista
             x_origen, y_origen = origen
             x_destino, y_destino = destino
-
+    
             # Dibujar arista en la escena
             self.sceneAlgoritmos.addLine(x_origen, y_origen, x_destino, y_destino, pen_arbol_minimo)
             self.dibujar_puntos()
-   
+    
 
     @Slot()  # Algoritmo de Prim
     def Prim(self):
